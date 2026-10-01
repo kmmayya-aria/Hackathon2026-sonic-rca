@@ -1,0 +1,16 @@
+id: appl.unconsumed
+feature: appl
+object_type: APPL_ENTRY
+# ProducerStateTable writes land in `_<TABLE>:<key>` + `<TABLE>_KEY_SET`; the
+# consumer (orchagent) moves them to `<TABLE>:<key>`. Entries still pending at
+# capture time mean the producer delivered and the consumer is not draining.
+intent:   {db: APPL_DB, pattern: "_*", filter: producer_pending}
+reality:  {db: APPL_DB, map: appl_consumed}
+compare:  []
+fragment: appl_body
+correlate:
+  - {source: syslog, match: "swss#orchagent"}
+on_divergence:
+  severity: high
+  stage_missing: orchagent
+  stage_mismatch: orchagent

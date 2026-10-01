@@ -1,0 +1,21 @@
+id: route.programming
+feature: route
+object_type: ROUTE_ENTRY
+intent:   {db: APPL_DB, pattern: "ROUTE_TABLE:*", filter: route_in_asic_scope}
+reality:  {db: ASIC_DB, map: sai_route_entry}
+compare:  []
+fragment: route_dest
+correlate:
+  - {source: sairedis.rec}
+  - {source: syslog, match: "orchagent|routeorch|SAI_STATUS"}
+on_divergence:
+  severity: high
+  stage_missing: orchagent|syncd
+  stage_mismatch: orchagent
+  refine_missing:
+    # orchagent's newest request for this route was a (bulk) create, never a
+    # remove, and no SAI error was logged for it: ASIC_DB lost it out-of-band
+    - stage: reality-drift
+      rec_last: '^[^|]*\|[cC]\|'
+      unless_log: 'SAI_STATUS_(?!SUCCESS)[A-Z_]+.*{frag}'
+      log_fragment: route_cidr

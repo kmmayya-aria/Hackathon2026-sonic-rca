@@ -1,0 +1,12 @@
+id: vlan.membership
+feature: vlan
+object_type: VLAN_MEMBER
+intent:   {db: CONFIG_DB, pattern: "VLAN_MEMBER|*"}
+reality:  {db: APPL_DB,   map: vlan_member_table}
+compare:  [tagging_mode]
+correlate:
+  - {source: syslog, match: "vlanmgrd"}
+on_divergence:
+  severity: high
+  stage_missing: vlanmgrd
+  stage_mismatch: vlanmgrd

@@ -1,0 +1,19 @@
+id: intf.subnet_programming
+feature: interface
+object_type: INTF
+# intfmgrd publishes each interface address to APPL_DB INTF_TABLE; intfsorch
+# then programs the connected subnet route via that interface's RIF.
+intent:   {db: APPL_DB, pattern: "INTF_TABLE:*", filter: intf_subnet_in_asic_scope}
+reality:  {db: ASIC_DB, map: sai_intf_subnet_route}
+compare:  []
+fragment: intf_prefix
+correlate:
+  - {source: syslog, match: "orchagent: .*(setIntf:|[Ii]ntfsOrch).*{frag}", newest: true}
+on_divergence:
+  severity: high
+  stage_missing: orchagent|syncd
+  stage_mismatch: orchagent
+  refine_missing:
+    # the subnet is already owned by another interface: intfsorch rejects the
+    # address as overlapping and retries it forever (real capture s08)
+    - {stage: orchagent, check: intf_subnet_overlap}

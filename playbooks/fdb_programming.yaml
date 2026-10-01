@@ -1,0 +1,22 @@
+id: fdb.programming
+feature: fdb
+object_type: FDB_ENTRY
+# Learned MACs: fdborch records them in STATE_DB FDB_TABLE (APPL_DB FDB_TABLE
+# only carries static/EVPN entries, see fdb_programming_static.yaml).
+intent:   {db: STATE_DB, pattern: "FDB_TABLE|*"}
+reality:  {db: ASIC_DB,  map: sai_fdb_entry}
+compare:  []
+fragment: fdb_mac
+correlate:
+  - {source: sairedis.rec}
+  - {source: syslog, match: "(?i)fdborch|{frag}"}
+on_divergence:
+  severity: medium
+  stage_missing: orchagent|syncd
+  stage_mismatch: orchagent
+  refine_missing:
+    # syncd's newest event for this entry is LEARNED (never aged/flushed/
+    # moved): the ASIC held it and ASIC_DB lost it out-of-band
+    - stage: reality-drift
+      rec_fragment: fdb_mac_rec
+      rec_last: '\|n\|fdb_event\|.*SAI_FDB_EVENT_LEARNED'

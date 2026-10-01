@@ -1,0 +1,14 @@
+# sonic-vs (202605) fault taxonomy — control-plane / DB-pipeline classes only
+scenarios:
+  - {id: s01_port_admin_mismatch,   inject: "config intent up; out-of-band admin down",       stage: portmgrd}
+  - {id: s02_vlan_member_stalled,   inject: "stop vlanmgrd; add VLAN member to CONFIG_DB",    stage: vlanmgrd}
+  - {id: s03_route_not_programmed,  inject: "kill orchagent mid route-install",               stage: orchagent}
+  - {id: s04_unresolved_nexthop,    inject: "static route with absent neighbor",              stage: staticd}  # FRR NHT withholds it; was neighorch
+  - {id: s05_swss_down,             inject: "stop swss container",                            stage: swss}
+  - {id: s06_asic_db_drift,         inject: "delete ASIC_DB route entry out-of-band",         stage: reality-drift}
+  - {id: s07_bgp_peer_asn,          inject: "wrong peer ASN in CONFIG_DB",                    stage: bgp/frr}
+  - {id: s08_intf_ip_overlap,       inject: "overlapping interface subnet",                   stage: orchagent}  # intfsorch rejects it; was intfmgrd
+  - {id: s09_mtu_not_propagated,    inject: "MTU change blocked mid-pipeline",                stage: portmgrd|portsorch}
+  - {id: s10_acl_not_programmed,    inject: "ACL rule with match invalid on vs",              stage: aclorch}
+  - {id: s11_fpmsyncd_stalled,      inject: "stop fpmsyncd; new BGP/static prefixes in FRR RIB", stage: zebra/fpmsyncd}
+  - {id: s12_fdb_not_programmed,    inject: "delete learned FDB entry from ASIC_DB out-of-band", stage: reality-drift}

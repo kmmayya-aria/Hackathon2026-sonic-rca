@@ -1,0 +1,17 @@
+id: acl.rule_programming
+feature: acl
+object_type: ACL_RULE
+# aclorch consumes CONFIG_DB ACL_RULE directly and reports the outcome in
+# STATE_DB ACL_RULE_TABLE (status Active once the SAI ACL entry exists).
+intent:   {db: CONFIG_DB, pattern: "ACL_RULE|*", filter: acl_rule_dataplane}
+reality:
+  db: STATE_DB
+  map: state_acl_rule
+  expect: {status: Active}
+fragment: acl_table
+correlate:
+  - {source: syslog, match: "doAclRuleTask|AclRule|{frag}", newest: true}
+on_divergence:
+  severity: medium
+  stage_missing: aclorch
+  stage_mismatch: aclorch

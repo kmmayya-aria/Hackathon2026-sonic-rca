@@ -1,0 +1,15 @@
+id: neighbor.programming
+feature: neighbor
+object_type: NEIGHBOR_ENTRY
+intent:   {db: APPL_DB, pattern: "NEIGH_TABLE:*", filter: neigh_in_asic_scope}
+reality:  {db: ASIC_DB, map: sai_neighbor_entry}
+compare:  []
+fragment: neigh_ip_json
+correlate:
+  - {source: sairedis.rec}
+  - {source: syslog, match: "neighorch|nbrmgrd|neighsyncd",
+     files: "syslog|syslog.*|nbrmgrd.log|nbrmgrd.log.*|neighsyncd.log|neighsyncd.log.*"}
+on_divergence:
+  severity: medium
+  stage_missing: orchagent|syncd
+  stage_mismatch: orchagent

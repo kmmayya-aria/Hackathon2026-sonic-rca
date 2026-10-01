@@ -1,0 +1,20 @@
+id: bgp.session
+feature: bgp
+object_type: BGP_NEIGHBOR
+intent:   {db: CONFIG_DB, pattern: "BGP_NEIGHBOR|*", filter: bgp_admin_up}
+reality:
+  db: FRR_BGP
+  map: frr_bgp_peer
+  expect: {state: Established}
+  benign: bgp_peer_never_reached
+compare:  [asn]
+fragment: bgp_peer
+correlate:
+  # the validation image's rsyslog routes bgp#bgpd to log/bgpd.log, not syslog
+  # (?<![0-9.])..(?![0-9]): 10.0.0.1 must not match 10.0.0.11 / 110.0.0.1
+  - {source: syslog, match: "bgpd.*(?<![0-9.]){frag}(?![0-9])", newest: true,
+     files: "syslog|syslog.*|bgpd.log|bgpd.log.*"}
+on_divergence:
+  severity: high
+  stage_missing: bgp/frr
+  stage_mismatch: bgp/frr

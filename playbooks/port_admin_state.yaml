@@ -1,0 +1,12 @@
+id: port.admin_state
+feature: port
+object_type: PORT
+intent:   {db: CONFIG_DB, pattern: "PORT|*"}
+reality:  {db: APPL_DB,   map: port_table}
+compare:  [admin_status, mtu]
+correlate:
+  - {source: syslog, match: "portmgrd|portsyncd"}
+on_divergence:
+  severity: medium
+  stage_missing: portmgrd
+  stage_mismatch: portmgrd

@@ -1,0 +1,13 @@
+id: route.frr_to_appl
+feature: route
+object_type: ROUTE
+intent:   {db: FRR_RIB, pattern: "RIB|*", filter: rib_selected_bgp_static}
+reality:  {db: APPL_DB, map: appl_route_from_rib}
+compare:  [nexthop]
+fragment: route_cidr
+correlate:
+  - {source: syslog, match: "fpmsyncd|zebra.*(fpm|FPM|dplane)"}
+on_divergence:
+  severity: high
+  stage_missing: zebra/fpmsyncd
+  stage_mismatch: zebra/fpmsyncd

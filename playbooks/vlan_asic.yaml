@@ -1,0 +1,12 @@
+id: vlan.asic_programming
+feature: vlan
+object_type: VLAN
+intent:   {db: CONFIG_DB, pattern: "VLAN|*"}
+reality:  {db: ASIC_DB,   map: sai_vlan}
+compare:  []
+correlate:
+  - {source: sairedis.rec}
+on_divergence:
+  severity: high
+  stage_missing: orchagent|syncd
+  stage_mismatch: orchagent

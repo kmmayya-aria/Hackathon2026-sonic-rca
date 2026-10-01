@@ -1,0 +1,20 @@
+id: route.static_to_rib
+feature: route
+object_type: STATIC_ROUTE
+intent:   {db: CONFIG_DB, pattern: "STATIC_ROUTE|*"}
+reality:
+  db: FRR_RIB
+  map: frr_rib_from_static
+  expect: {selected: "true"}
+fragment: route_cidr
+correlate:
+  - {source: syslog, match: "(staticd|zebra|frrcfgd).*{frag}", newest: true,
+     files: "syslog|syslog.*|frr.log|frr.log.*|zebra.log|zebra.log.*"}
+on_divergence:
+  severity: high
+  stage_missing: frrcfgd|staticd
+  stage_mismatch: staticd
+  refine_missing:
+    # frrcfgd rendered the route and staticd registered its nexthop with zebra
+    # NHT, which reports it unresolved: staticd never installs the route
+    - {stage: staticd, check: static_nexthop_unresolved}

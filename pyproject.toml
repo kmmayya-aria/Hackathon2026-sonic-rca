@@ -1,0 +1,16 @@
+[project]
+name = "sonic-rca"
+version = "0.0.1"
+description = "Evidence-cited root cause analysis for SONiC techsupport dumps (community SONiC 202605)"
+requires-python = ">=3.9"
+dependencies = ["pyyaml"]
+
+[project.scripts]
+sonic-rca = "sonic_rca.cli:main"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
